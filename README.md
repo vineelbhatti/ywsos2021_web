@@ -75,7 +75,7 @@ TODO: (venv) ywsos2021_web/ $>  python seed_db.py
 Point your web browser to http://localhost:5000/
 
 ## Running the automated tests
-python test_cases/run_tests.py
+(venv) ywsos2021_web/ $> python test_cases/run_tests.py
 
 
 Authors
