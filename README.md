@@ -46,7 +46,7 @@ Create a database
 # Create config variables in the .env file
 Create a file named .env 
 Add the following config variables to it,
-
+```
 ###################### .env ######################
 DEBUG = True
 TESTING = False
@@ -64,7 +64,7 @@ DOMAIN='http://127.0.0.1:5000'
 SECRET_KEY=<<Add your secret key  here>>
 SECURITY_PASSWORD_SALT=<<Add your password salt here>>
 ###################### .env ######################
-
+```
 # Create DB tables and populate the roles and users tables
 TODO: (venv) ywsos2021_web/ $>  python seed_db.py
 
