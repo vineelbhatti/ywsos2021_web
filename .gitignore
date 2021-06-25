@@ -1,0 +1,5 @@
+venv/
+.env
+__pycache__/
+test_cases/__pycache__
+test_cases/reports
