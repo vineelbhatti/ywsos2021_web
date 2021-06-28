@@ -19,6 +19,7 @@ must add python to the path variable
 ```
 .
 |──────app.py
+|──────config.py
 |──────static/
 |──────templates/
 |──────test_cases/
