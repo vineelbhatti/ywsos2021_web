@@ -1,0 +1,25 @@
+.navbar {
+	justify-content: space-between;
+}
+
+.navbar-nav {
+	align-self: center;
+}
+
+nav {
+    text-align:center;
+}
+nav ul {
+    margin: 0;
+    padding: 0;
+    display:inline-block;
+    list-style: none;
+}
+nav li {
+    display:inline-block;
+}
+nav li a {
+    display: block;
+    padding: 5px 5px;
+    text-decoration: none;
+}
