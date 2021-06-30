@@ -23,5 +23,5 @@ class Config:
     SECRET_KEY = os.environ.get('SESSION_TYPE')
     SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT')
     SESSION_TYPE = os.environ.get('SESSION_TYPE')
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=int(os.environ.get('SESSION_TIME')))
     SESSION_MONGODB = pymongo.MongoClient(os.environ.get('MONGO_URI'))
