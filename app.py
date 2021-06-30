@@ -60,14 +60,13 @@ def token_required(something):
 def index():
     return render_template('index.html')
 
-if __name__ == '__main__':
-    @app.route('/api')
-    def api_index():
-        # Very simple
-        return_data = {
-            'title' : 'API test'
-        }
-        return jsonify(return_data)
+@app.route('/api')
+def api_index():
+    # Very simple
+    return_data = {
+        'title' : 'API test'
+    }
+    return jsonify(return_data)
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
