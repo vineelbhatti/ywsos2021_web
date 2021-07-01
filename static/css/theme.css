@@ -1,25 +1,79 @@
+@import url('https://fonts.googleapis.com/css?family=Inter&display=swap');
+
+body {
+    font-family: Inter !important;
+    letter-spacing: -0.017em;
+}
+
 .navbar {
-	justify-content: space-between;
+	text-align: center;
 }
 
 .navbar-nav {
-	align-self: center;
+	align-content: center;
+    margin: auto;
 }
 
-nav {
-    text-align:center;
+#buttonrect {
+    margin: 0 !important;
+    width: 5em;
+    height: 2.5em;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #000000 -14.74%, rgba(41, 41, 41, 0.6) 132.63%);
+    box-shadow: 6.19761px 3.54149px 16.8221px rgba(0, 0, 0, 0.54);
+    border-radius: 0.5em;
+    text-align: center;
+    padding: 0 !important;
+
 }
-nav ul {
-    margin: 0;
+
+#buttonrect p {
+
+    margin: auto !important;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: bolder;
+    font-size: 1em;
+    color: white;
+    line-height: 30px;
+    /* identical to box height */
+
+    display: flex;
+    letter-spacing: -0.017em;
+    background-image: linear-gradient(180deg, #FFFFFF 0%, rgba(238, 238, 238, 0.58) 100%);
+    -webkit-background-clip: text !important;
+    color: transparent !important;
+    
+
+}
+
+.btn {
     padding: 0;
-    display:inline-block;
-    list-style: none;
+    margin: 0 !important;
 }
-nav li {
-    display:inline-block;
+
+#login {
+    margin: 0 !important;
 }
-nav li a {
+
+.nav-item, .nav-link {
+    font-style: normal;
+    font-weight: 500;
+    color: #393939 !important;
+}
+
+.active {
+    font-style: normal;
+    font-weight: bold;
+    color: #000000 !important;
+}
+
+.active:after {
+    content: "";
     display: block;
-    padding: 5px 5px;
-    text-decoration: none;
+    margin: 0 auto;
+    width: 75%;
+    border-bottom: 0.15em solid black;
 }
