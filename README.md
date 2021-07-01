@@ -20,6 +20,8 @@ must add python to the path variable
 .
 |──────app.py
 |──────config.py
+|──────api_test.py
+|──────documentation/
 |──────static/
 |──────templates/
 |──────test_cases/
@@ -68,6 +70,12 @@ SECURITY_PASSWORD_SALT=<<Add your password salt here>>
 ```
 ## Create DB tables and populate the roles and users tables
 TODO: (venv) ywsos2021_web/ $>  python seed_db.py
+
+## Make the api documentation
+(venv) ywsos2021_web/ $> cd documentation <br />
+(venv) ywsos2021_web/documentation/ $> make html <br />
+(venv) ywsos2021_web/documentation/ $> cd .. <br />
+(venv) ywsos2021_web/ $> 
 
 ## Start the Flask development web server
 (venv) ywsos2021_web/ $> python app.py
