@@ -68,11 +68,6 @@ body {
     font-style: normal;
     font-weight: bold;
     color: #000000 !important;
-    /*border-bottom: 0.2em black solid;
-    padding-bottom: 0 !important;
-    border-bottom-width: 50%;*/
-    /*text-decoration: underline;
-    text-underline-position: under;*/
 }
 
 .active:after {
