@@ -55,11 +55,14 @@ def token_required(something):
     return wrap
 
 ########################################################################
-
+@app.route('/about')
 @app.route('/')
-def index():
+def about():
     return render_template('index.html')
 
+@app.route('/upload')
+def upload():
+    return render_template('upload.html')
 @app.route('/api')
 def api_index():
     # Very simple
