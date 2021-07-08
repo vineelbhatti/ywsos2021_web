@@ -1,11 +1,15 @@
 from flask import Flask, render_template, jsonify, request
 from flask_session import Session
 from flask_pymongo import PyMongo
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField
+from wtforms.validators import DataRequired, Email
 import pymongo
 import os
-from config import Config
+from config import Config, db
 import datetime
 import jwt
+import bson
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -54,24 +58,96 @@ def token_required(something):
             return jsonify(return_data)
     return wrap
 
+##############Login & Singup############################################
+def handle_auth(login_form, signup_form, url):
+    users = db['users']
+    if login_form.validate_on_submit():
+        result = users.find_one({
+            'username': login_form.username.data,
+            'password': login_form.password.data,
+        })
+        if result != None:
+            session['logged_in'] = True
+            session['logged_in_id'] = result['_id']
+            return redirect('/main')
+        return redirect(url)
+    if signup_form.validate_on_submit():
+        users.insert_one({
+            "username": signup_form.username.data,
+            "email": signup_form.email.data,
+            "password": signup_form.password.data,
+        })
+        return redirect(url)
+    return None
+#########Require Login#################################################
+def login_required(something):
+    def wrap():
+        if session['logged_in']:
+            return something(session['logged_in_id'])
+        else:
+            return redirect('/')
+    return wrap
+
+########################################################################
+#########################Forms##########################################
+########################################################################
+class LoginForm(FlaskForm):
+    username = StringField("Username :", validators = [DataRequired()])
+    password = PasswordField("Password :", validators = [DataRequired()])
+
+class SignupForm(FlaskForm):
+    username = StringField("Username :", validators = [DataRequired()])
+    email = StringField("Email :", validators = [DataRequired(), Email()])
+    password = PasswordField("Password :", validators = [DataRequired()])
+########################################################################
+#########################Routes#########################################
 ########################################################################
 @app.route('/about')
 @app.route('/')
 def about():
-    return render_template('index.html')
+    login_form = LoginForm()
+    signup_form = SignupForm()
+    res = handle_auth(login_form, signup_form, '/')
+    if res != None:
+        return res
+    return render_template('index.html', login_form=login_form, signup_form=signup_form)
 
 @app.route('/upload')
 def upload():
-    return render_template('upload.html')
+    login_form = LoginForm()
+    signup_form = SignupForm()
+    res = handle_auth(login_form, signup_form, '/upload')
+    if res != None:
+        return res
+    return render_template('upload.html', login_form=login_form, signup_form=signup_form)
 
 @app.route('/forum')
 def forum():
-    return render_template('forum.html')
+    login_form = LoginForm()
+    signup_form = SignupForm()
+    res = handle_auth(login_form, signup_form, '/forum')
+    if res != None:
+        return res
+    return render_template('forum.html', login_form=login_form, signup_form=signup_form)
 
 @app.route('/contact')
 def contact():
-    return render_template('contact.html')
+    login_form = LoginForm()
+    signup_form = SignupForm()
+    res = handle_auth(login_form, signup_form, '/contact')
+    if res != None:
+        return res
+    return render_template('contact.html', login_form=login_form, signup_form=signup_form)
 
+@app.route('/main')
+@login_required
+def main(user_id):
+    user = users.find_one({'_id': bson.ObjectId(insert_result.inserted_id)})
+    return "Hello, {}".format(user['username'])
+
+########################################################################
+#########################API############################################
+########################################################################
 @app.route('/api')
 def api_index():
     # Very simple
