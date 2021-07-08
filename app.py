@@ -2,8 +2,8 @@ from flask import Flask, render_template, jsonify, request, redirect, session
 from flask_session import Session
 from flask_pymongo import PyMongo
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
-from wtforms.validators import DataRequired, Email
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Email, EqualTo
 import pymongo
 import os
 from config import Config, db
@@ -95,16 +95,19 @@ def login_required(something):
 class LoginForm(FlaskForm):
     username = StringField("Username :", validators = [DataRequired()])
     password = PasswordField("Password :", validators = [DataRequired()])
+    submit = SubmitField("Log In")
 
 class SignupForm(FlaskForm):
     username = StringField("Username :", validators = [DataRequired()])
     email = StringField("Email :", validators = [DataRequired(), Email()])
     password = PasswordField("Password :", validators = [DataRequired()])
+    confirm_password = PasswordField("Confirm Password :", validators = [DataRequired(), EqualTo('password')])
+    submit = SubmitField("Sign Up")
 ########################################################################
 #########################Routes#########################################
 ########################################################################
-@app.route('/about')
-@app.route('/')
+@app.route('/about', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def about():
     login_form = LoginForm()
     signup_form = SignupForm()
@@ -113,7 +116,7 @@ def about():
         return res
     return render_template('index.html', login_form=login_form, signup_form=signup_form)
 
-@app.route('/upload')
+@app.route('/upload', methods=['GET', 'POST'])
 def upload():
     login_form = LoginForm()
     signup_form = SignupForm()
@@ -122,7 +125,7 @@ def upload():
         return res
     return render_template('upload.html', login_form=login_form, signup_form=signup_form)
 
-@app.route('/forum')
+@app.route('/forum', methods=['GET', 'POST'])
 def forum():
     login_form = LoginForm()
     signup_form = SignupForm()
@@ -131,7 +134,7 @@ def forum():
         return res
     return render_template('forum.html', login_form=login_form, signup_form=signup_form)
 
-@app.route('/contact')
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
     login_form = LoginForm()
     signup_form = SignupForm()

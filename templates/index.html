@@ -44,22 +44,40 @@
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-body">
-            <h5 class="modal-title" id="loginModalLabel">Sign In</h5>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div>
+            <div class="modal-body">
+                <h5 class="modal-title" id="loginModalLabel">Sign In</h5>
+
+                {{login_form.hidden_tag()}}
+
+                {{login_form.username.label}}<br />
+                {{login_form.username(size=32)}}<br />
+                {{login_form.password.label}}<br />
+                {{login_form.password(size=32)}}<br /><br />
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {{login_form.submit(class_="btn btn-primary")}}
+            </div>
         </div>
       </div>
     </div>
     <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-body">
-            <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div>
+            <div class="modal-body">
+                <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
+
+                {{signup_form.hidden_tag()}}
+
+                {{signup_form.username.label}}<br />
+                {{signup_form.username(size=32)}}<br />
+                {{signup_form.email.label}}<br />
+                {{signup_form.email(size=32)}}<br />
+                {{signup_form.password.label}}<br />
+                {{signup_form.password(size=32)}}<br />
+                {{signup_form.confirm_password.label}}<br />
+                {{signup_form.confirm_password(size=32)}}<br /><br />
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {{signup_form.submit(class_="btn btn-primary")}}
+            </div>
         </div>
       </div>
     </div>
