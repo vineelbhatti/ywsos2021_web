@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, session
 from flask_session import Session
 from flask_pymongo import PyMongo
 from flask_wtf import FlaskForm
@@ -23,7 +23,7 @@ Session(app)
 SECRET_KEY = app.config['SECRET_KEY']
 
 def token_required(something):
-    def wrap():
+    def wrap_token():
         try:
             token_passed = request.headers['TOKEN']
             if request.headers['TOKEN'] != '' and request.headers['TOKEN'] != None:
@@ -56,11 +56,12 @@ def token_required(something):
                 "d_message" : str(e)
                 }
             return jsonify(return_data)
-    return wrap
+    return wrap_token
 
 ##############Login & Singup############################################
 def handle_auth(login_form, signup_form, url):
     users = db['users']
+    session['logged_in'] = False
     if login_form.validate_on_submit():
         result = users.find_one({
             'username': login_form.username.data,
