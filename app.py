@@ -57,29 +57,6 @@ def token_required(something):
                 }
             return jsonify(return_data)
     return wrap_token
-
-##############Login & Singup############################################
-def handle_auth(login_form, signup_form, url):
-    users = db['users']
-    session['logged_in'] = False
-    if login_form.validate_on_submit():
-        result = users.find_one({
-            'username': login_form.username.data,
-            'password': login_form.password.data,
-        })
-        if result != None:
-            session['logged_in'] = True
-            session['logged_in_id'] = result['_id']
-            return redirect('/main')
-        return redirect(url)
-    if signup_form.validate_on_submit():
-        users.insert_one({
-            "username": signup_form.username.data,
-            "email": signup_form.email.data,
-            "password": signup_form.password.data,
-        })
-        return redirect(url)
-    return None
 #########Require Login#################################################
 def login_required(something):
     def wrap():
@@ -111,43 +88,65 @@ class SignupForm(FlaskForm):
 def about():
     login_form = LoginForm()
     signup_form = SignupForm()
-    res = handle_auth(login_form, signup_form, '/')
-    if res != None:
-        return res
     return render_template('index.html', login_form=login_form, signup_form=signup_form)
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     login_form = LoginForm()
     signup_form = SignupForm()
-    res = handle_auth(login_form, signup_form, '/upload')
-    if res != None:
-        return res
     return render_template('upload.html', login_form=login_form, signup_form=signup_form)
 
 @app.route('/forum', methods=['GET', 'POST'])
 def forum():
     login_form = LoginForm()
     signup_form = SignupForm()
-    res = handle_auth(login_form, signup_form, '/forum')
-    if res != None:
-        return res
     return render_template('forum.html', login_form=login_form, signup_form=signup_form)
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     login_form = LoginForm()
     signup_form = SignupForm()
-    res = handle_auth(login_form, signup_form, '/contact')
-    if res != None:
-        return res
     return render_template('contact.html', login_form=login_form, signup_form=signup_form)
 
 @app.route('/main')
 @login_required
 def main(user_id):
-    user = users.find_one({'_id': bson.ObjectId(insert_result.inserted_id)})
-    return "Hello, {}".format(user['username'])
+    users = db['users']
+    user = users.find_one({'_id': bson.ObjectId(session['logged_in_id'])})
+    return render_template("main.html", user=user)
+
+@app.route('/login', methods=['POST'])
+def login():
+    login_form = LoginForm()
+    if login_form.validate_on_submit():
+        users = db['users']
+        result = users.find_one({
+            'username': login_form.username.data,
+            'password': login_form.password.data,
+        })
+        if result != None:
+            session['logged_in'] = True
+            session['logged_in_id'] = result['_id']
+            return redirect('/main')
+    return redirect('/')
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    signup_form = SignupForm()
+    if signup_form.validate_on_submit():
+        users = db['users']
+        users.insert_one({
+            "username": signup_form.username.data,
+            "email": signup_form.email.data,
+            "password": signup_form.password.data,
+        })
+    return redirect('/')
+
+@app.route('/logout')
+def logout():
+    session['logged_in'] = False;
+    session['logged_in_id'] = 0
+    return redirect('/')
 
 ########################################################################
 #########################API############################################

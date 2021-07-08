@@ -23,7 +23,7 @@
             <!-- <h1 class="navbar-brand">GeoRepair</h1>
             <img src="../static/css/hammer.svg" id="hammer" class="d-inline-block align-text-top"> -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
             </button>
             <span class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mb-2 mb-lg-0">
@@ -38,52 +38,53 @@
                     <div id="buttonrect"><p>Sign Up!</p></div>
                 </a>
             </span>
-            
+
         </div>
     </nav>
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
-                <h5 class="modal-title" id="loginModalLabel">Sign In</h5>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title" id="loginModalLabel">Sign In</h5>
+                    <form method="post" action="/login" novalidate>
+                        {{login_form.hidden_tag()}}
 
-                {{login_form.hidden_tag()}}
-
-                {{login_form.username.label}}<br />
-                {{login_form.username(size=32)}}<br />
-                {{login_form.password.label}}<br />
-                {{login_form.password(size=32)}}<br /><br />
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                {{login_form.submit(class_="btn btn-primary")}}
+                        {{login_form.username.label}}<br />
+                        {{login_form.username(size=32)}}<br />
+                        {{login_form.password.label}}<br />
+                        {{login_form.password(size=32)}}<br /><br />
+                        {{login_form.submit(class_="btn btn-primary")}}
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </form>
+                </div>
             </div>
         </div>
-      </div>
     </div>
     <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
-                <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
+                    <form method="post" action="/signup" novalidate>
+                        {{signup_form.hidden_tag()}}
 
-                {{signup_form.hidden_tag()}}
-
-                {{signup_form.username.label}}<br />
-                {{signup_form.username(size=32)}}<br />
-                {{signup_form.email.label}}<br />
-                {{signup_form.email(size=32)}}<br />
-                {{signup_form.password.label}}<br />
-                {{signup_form.password(size=32)}}<br />
-                {{signup_form.confirm_password.label}}<br />
-                {{signup_form.confirm_password(size=32)}}<br /><br />
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                {{signup_form.submit(class_="btn btn-primary")}}
+                        {{signup_form.username.label}}<br />
+                        {{signup_form.username(size=32)}}<br />
+                        {{signup_form.email.label}}<br />
+                        {{signup_form.email(size=32)}}<br />
+                        {{signup_form.password.label}}<br />
+                        {{signup_form.password(size=32)}}<br />
+                        {{signup_form.confirm_password.label}}<br />
+                        {{signup_form.confirm_password(size=32)}}<br /><br />
+                        {{signup_form.submit(class_="btn btn-primary")}}
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </form>
+                </div>
             </div>
         </div>
-      </div>
     </div>
 
     <!-- Optional JavaScript; choose one of the two! -->
-
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
