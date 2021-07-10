@@ -10,6 +10,7 @@ from config import Config, db
 import datetime
 import jwt
 import bson
+from functools import wraps
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -23,13 +24,14 @@ Session(app)
 SECRET_KEY = app.config['SECRET_KEY']
 
 def token_required(something):
-    def wrap_token():
+    @wraps(something)
+    def wrap_token(*args, **kwargs):
         try:
             token_passed = request.headers['TOKEN']
             if request.headers['TOKEN'] != '' and request.headers['TOKEN'] != None:
                 try:
                     data = jwt.decode(token_passed,SECRET_KEY, algorithms=['HS256'])
-                    return something(data['user_id'])
+                    return something(data['user_id'], *args, **kwargs)
                 except jwt.exceptions.ExpiredSignatureError:
                     return_data = {
                         "error": "1",
@@ -59,12 +61,13 @@ def token_required(something):
     return wrap_token
 #########Require Login#################################################
 def login_required(something):
-    def wrap():
+    @wraps(something)
+    def wrap_login(*args, **kwargs):
         if session['logged_in']:
-            return something(session['logged_in_id'])
+            return something(session['logged_in_id'], *args, **kwargs)
         else:
             return redirect('/')
-    return wrap
+    return wrap_login
 
 ########################################################################
 #########################Forms##########################################
