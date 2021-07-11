@@ -30,7 +30,7 @@ def token_required(something):
             token_passed = request.headers['TOKEN']
             if request.headers['TOKEN'] != '' and request.headers['TOKEN'] != None:
                 try:
-                    data = jwt.decode(token_passed,SECRET_KEY, algorithms=['HS256'])
+                    data = jwt.decode(token_passed, SECRET_KEY, algorithms=['HS256'])
                     return something(data['user_id'], *args, **kwargs)
                 except jwt.exceptions.ExpiredSignatureError:
                     return_data = {
@@ -86,30 +86,22 @@ class SignupForm(FlaskForm):
 ########################################################################
 #########################Routes#########################################
 ########################################################################
-@app.route('/about', methods=['GET', 'POST'])
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/about')
+@app.route('/')
 def about():
-    login_form = LoginForm()
-    signup_form = SignupForm()
-    return render_template('index.html', login_form=login_form, signup_form=signup_form)
+    return render_template('index.html')
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload')
 def upload():
-    login_form = LoginForm()
-    signup_form = SignupForm()
-    return render_template('upload.html', login_form=login_form, signup_form=signup_form)
+    return render_template('upload.html')
 
-@app.route('/forum', methods=['GET', 'POST'])
+@app.route('/forum')
 def forum():
-    login_form = LoginForm()
-    signup_form = SignupForm()
-    return render_template('forum.html', login_form=login_form, signup_form=signup_form)
+    return render_template('forum.html')
 
-@app.route('/contact', methods=['GET', 'POST'])
+@app.route('/contact')
 def contact():
-    login_form = LoginForm()
-    signup_form = SignupForm()
-    return render_template('contact.html', login_form=login_form, signup_form=signup_form)
+    return render_template('contact.html')
 
 @app.route('/main')
 @login_required
@@ -118,7 +110,7 @@ def main(user_id):
     user = users.find_one({'_id': bson.ObjectId(session['logged_in_id'])})
     return render_template("main.html", user=user)
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
@@ -131,9 +123,9 @@ def login():
             session['logged_in'] = True
             session['logged_in_id'] = result['_id']
             return redirect('/main')
-    return redirect('/')
+    return render_template("login.html", login_form=login_form)
 
-@app.route('/signup', methods=['POST'])
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
     signup_form = SignupForm()
     if signup_form.validate_on_submit():
@@ -143,7 +135,7 @@ def signup():
             "email": signup_form.email.data,
             "password": signup_form.password.data,
         })
-    return redirect('/')
+    return render_template("signup.html", signup_form=signup_form)
 
 @app.route('/logout')
 def logout():
