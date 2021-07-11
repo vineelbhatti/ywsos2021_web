@@ -138,7 +138,8 @@ def signup():
     return render_template("signup.html", signup_form=signup_form)
 
 @app.route('/logout')
-def logout():
+@login_required
+def logout(u_is):
     session['logged_in'] = False;
     session['logged_in_id'] = 0
     return redirect('/')
