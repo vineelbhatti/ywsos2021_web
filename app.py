@@ -133,7 +133,6 @@ def signup():
     if signup_form.validate_on_submit():
         users = db['users']
         dt_now = datetime.now(tz=timezone.utc)
-        print(dt_now)
         users.insert_one({
             "username": signup_form.username.data,
             "email": signup_form.email.data,
