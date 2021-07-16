@@ -12,6 +12,8 @@ import jwt
 import bson
 from functools import wraps
 from passlib.hash import pbkdf2_sha256
+from datetime import datetime, timezone
+import pytz
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -130,10 +132,13 @@ def signup():
     signup_form = SignupForm()
     if signup_form.validate_on_submit():
         users = db['users']
+        dt_now = datetime.now(tz=timezone.utc)
+        print(dt_now)
         users.insert_one({
             "username": signup_form.username.data,
             "email": signup_form.email.data,
             "password_hash": pbkdf2_sha256.hash(signup_form.password.data),
+            "signup_date": dt_now
         })
     return render_template("signup.html", signup_form=signup_form)
 
