@@ -12,8 +12,10 @@ import jwt
 import bson
 from functools import wraps
 from passlib.hash import pbkdf2_sha256
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import pytz
+from werkzeug.utils import secure_filename
+from uuid import uuid4
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -41,7 +43,7 @@ def token_required(something):
                         "message": "Token has expired"
                         }
                     return jsonify(return_data)
-                except:
+                except Exception as e:
                     return_data = {
                         "error": "1",
                         "message": "Invalid Token"
@@ -170,13 +172,14 @@ def api_login():
     password = request.form.get('password')
     users = db['users']
     result = users.find_one({
-        'username': login_form.username.data,
+        'username': username,
     })
     if result != None and pbkdf2_sha256.verify(password, result['password_hash']):
         # Generate exp time and token and return them
-        timeLimit= datetime.datetime.utcnow() + datetime.timedelta(minutes=24*60)
-        payload = {"user_id": result['_id'],"exp":timeLimit}
-        token = jwt.encode(payload,SECRET_KEY)
+        timeLimit= datetime.utcnow() + timedelta(minutes=24*60)
+        payload = {"user_id": str(result['_id']),"exp":timeLimit}
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        data = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         return_data = {
             "error": "0",
             "message": "Successful",
@@ -198,7 +201,7 @@ def api_signup():
     email = request.form.get('email')
     password = request.form.get('password')
     users = db['users']
-    dt_now1 = datetime.now(tz=timezone.utc)
+    dt_now1 = datetime.utcnow()
     users.insert_one({
         "username": username,
         "email": email,
@@ -211,6 +214,22 @@ def api_signup():
     }
     return jsonify(return_data)
 
+@app.route('/api/scans/add', methods=["POST"])
+@token_required
+def api_add(userId):
+    scans = db['scans']
+    f = request.files['image']
+    filename = str(uuid4())
+    f_name, f_ext = os.path.splitext(f.filename)
+    f.save(os.path.join('static/images/scans/', filename) + f_ext)
+    dt_now = datetime.utcnow()
+    scans.insert_one({
+        "u_id": userId,
+        "filename": filename,
+        "scandate": dt_now,
+    })
+    return {"error": "0", "message": "Succesful",}
+    
 @app.route('/api/wel',methods=['POST'])
 @token_required
 def api_welcome(userId):
@@ -228,4 +247,4 @@ def api_welcome(userId):
     return jsonify(return_data)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug = True)
