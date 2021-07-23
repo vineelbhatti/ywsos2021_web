@@ -110,16 +110,24 @@ def forum():
 def contact():
     return render_template('contact.html')
 
-@app.route('/main')
+@app.route('/main',methods=['GET','POST'])
 @login_required
 def main(user_id):
     users = db['users']
     user = users.find_one({'_id': bson.ObjectId(session['logged_in_id'])})
+    if request.method == "POST":
+        if request.form.get("changepass"):
+            print("hi")
+        if request.form.get("deleteacc"):
+            print("whassup")
+            users.remove({'_id': bson.ObjectId(session['logged_in_id'])})
+            return redirect("/logout")
     return render_template("main.html", user=user)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     login_form = LoginForm()
+    error = False
     if login_form.validate_on_submit():
         users = db['users']
         result = users.find_one({
@@ -129,11 +137,15 @@ def login():
             session['logged_in'] = True
             session['logged_in_id'] = result['_id']
             return redirect('/main')
-    return render_template("login.html", login_form=login_form)
+        else:
+            error = True
+    return render_template("login.html", login_form=login_form, error=error)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     signup_form = SignupForm()
+    usererror = False
+    emailerror = False
     if signup_form.validate_on_submit():
         users = db['users']
         dt_now = datetime.now(tz=timezone.utc)
@@ -147,11 +159,16 @@ def signup():
             "latitude": location.latitude,
             "longitude": location.longitude
         }
-        users.insert_one(user)
-        session['logged_in'] = True
-        session['logged_in_id'] = user['_id']
-        return redirect('/main')
-    return render_template("signup.html", signup_form=signup_form)
+        if users.find_one({"username":user["username"]}) is not None:
+            usererror = True
+        elif users.find_one({"email":user["email"]}) is not None:
+            emailerror = True
+        else:
+            users.insert_one(user)
+            session['logged_in'] = True
+            session['logged_in_id'] = user['_id']
+            return redirect('/main')
+    return render_template("signup.html", signup_form=signup_form,usererror=usererror,emailerror=emailerror)
 
 @app.route('/logout')
 @login_required
