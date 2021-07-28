@@ -16,7 +16,7 @@ from datetime import datetime, timezone, timedelta
 import pytz
 from werkzeug.utils import secure_filename
 from uuid import uuid4
-from  geopy.geocoders import Nominatim
+from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -32,6 +32,9 @@ SECRET_KEY = app.config['SECRET_KEY']
 def token_required(something):
     @wraps(something)
     def wrap_token(*args, **kwargs):
+        if 'logged_in' in session.keys():
+            if session['logged_in']:
+                return something(session['logged_in_id'], *args, **kwargs)
         try:
             token_passed = request.headers['TOKEN']
             if request.headers['TOKEN'] != '' and request.headers['TOKEN'] != None:
@@ -44,12 +47,12 @@ def token_required(something):
                         "message": "Token has expired"
                         }
                     return jsonify(return_data)
-                except Exception as e:
+                '''except Exception as e:
                     return_data = {
                         "error": "1",
                         "message": "Invalid Token"
                     }
-                    return jsonify(return_data)
+                    return jsonify(return_data)'''
             else:
                 return_data = {
                     "error" : "2",
@@ -94,9 +97,12 @@ class SignupForm(FlaskForm):
 #########################Routes#########################################
 ########################################################################
 @app.route('/about')
-@app.route('/')
 def about():
     return render_template('index.html')
+
+@app.route('/')
+def home():
+    return redirect("/about")
 
 @app.route('/upload')
 def upload():
@@ -110,16 +116,23 @@ def forum():
 def contact():
     return render_template('contact.html')
 
-@app.route('/main')
+@app.route('/main',methods=['GET','POST'])
 @login_required
 def main(user_id):
     users = db['users']
     user = users.find_one({'_id': bson.ObjectId(session['logged_in_id'])})
+    if request.method == "POST":
+        if request.form.get("changepass"):
+            pass
+        if request.form.get("deleteacc"):
+            users.remove({'_id': bson.ObjectId(session['logged_in_id'])})
+            return redirect("/logout")
     return render_template("main.html", user=user)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     login_form = LoginForm()
+    error = False
     if login_form.validate_on_submit():
         users = db['users']
         result = users.find_one({
@@ -127,13 +140,17 @@ def login():
         })
         if result != None and pbkdf2_sha256.verify(login_form.password.data, result['password_hash']):
             session['logged_in'] = True
-            session['logged_in_id'] = result['_id']
+            session['logged_in_id'] = str(result['_id'])
             return redirect('/main')
-    return render_template("login.html", login_form=login_form)
+        else:
+            error = True
+    return render_template("login.html", login_form=login_form, error=error)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     signup_form = SignupForm()
+    usererror = False
+    emailerror = False
     if signup_form.validate_on_submit():
         users = db['users']
         dt_now = datetime.now(tz=timezone.utc)
@@ -147,17 +164,22 @@ def signup():
             "latitude": location.latitude,
             "longitude": location.longitude
         }
-        users.insert_one(user)
-        session['logged_in'] = True
-        session['logged_in_id'] = user['_id']
-        return redirect('/main')
-    return render_template("signup.html", signup_form=signup_form)
+        if users.find_one({"username":user["username"]}) is not None:
+            usererror = True
+        elif users.find_one({"email":user["email"]}) is not None:
+            emailerror = True
+        else:
+            users.insert_one(user)
+            session['logged_in'] = True
+            session['logged_in_id'] = str(user['_id'])
+            return redirect('/main')
+    return render_template("signup.html", signup_form=signup_form,usererror=usererror,emailerror=emailerror)
 
 @app.route('/logout')
 @login_required
 def logout(u_is):
     session['logged_in'] = False;
-    session['logged_in_id'] = 0
+    session['logged_in_id'] = ''
     return redirect('/')
 
 ########################################################################
@@ -220,22 +242,142 @@ def api_signup():
     }
     return jsonify(return_data)
 
+@app.route('/api/scans', methods=["POST"])
+@token_required
+def api_find(userId):
+    scans = db['scans']
+    lat = float(request.form.get('lat', 0))
+    long = float(request.form.get('long', 0))
+    radius = float(request.form.get('range', None))
+    scans.create_index([('loc', '2dsphere')])
+    result = []
+    search = [
+        {
+            '$geoNear': {
+                'near': [ lat, long ],
+                'distanceField': 'dist',
+                'spherical': True,
+            }
+        },
+        {
+            '$match': {
+                'u_id': userId,
+            },
+        },
+        {
+            '$sort': {
+                'dist': 1,
+            }
+        }
+    ]
+    if radius:
+        search[0]['$geoNear']['maxDistance'] = radius
+    result = scans.aggregate(search)
+    repairs = []
+    for r in result:
+        scan = {
+            "url": '/static/images/scans/'+r['filename'],
+            "scandate": r['scandate'],
+            "position": r['position'],
+            "filename": r['filename']
+        }
+        repairs.append(scan)
+    return {
+        "repairs": repairs,
+    }
+
+@app.route('/api/scans/all', methods=["POST"])
+def api_find_all():
+    scans = db['scans']
+    lat = float(request.form.get('lat', 0))
+    long = float(request.form.get('long', 0))
+    radius = float(request.form.get('range', None))
+    scans.create_index([('loc', '2dsphere')])
+    result = []
+    search = [
+        {
+            '$geoNear': {
+                'near': [ lat, long ],
+                'distanceField': 'dist',
+                'spherical': True,
+            }
+        },
+        {
+            '$sort': {
+                'dist': 1,
+            }
+        }
+    ]
+    if radius:
+        search[0]['$geoNear']['maxDistance'] = radius
+    result = scans.aggregate(search)
+    repairs = []
+    for r in result:
+        scan = {
+            "url": '/static/images/scans/'+r['filename'],
+            "scandate": r['scandate'],
+            "position": r['position'],
+            "filename": r['filename']
+        }
+        repairs.append(scan)
+    return {
+        "repairs": repairs,
+    }
+
+@app.route('/api/scans/forum', methods=["POST"])
+def api_find_forum():
+    scans = db['scans']
+    result = scans.find({}).sort([('upvote', pymongo.DESCENDING)])
+    repairs = []
+    for r in result:
+        scan = {
+            "url": '/static/images/scans/'+r['filename'],
+            "scandate": r['scandate'],
+            "position": r['position'],
+            "filename": r['filename']
+        }
+        repairs.append(scan)
+    return {
+        "repairs": repairs,
+    }
+
+@app.route('/api/scans/vote', methods=["POST"])
+@token_required
+def api_vote(userId):
+    name = request.form.get("name")
+    db.scans.update({'filename': name}, {'$inc': {'upvote': 1}})
+    return {
+        "error": "0",
+        "message": "Successful",
+    }
+
 @app.route('/api/scans/add', methods=["POST"])
 @token_required
 def api_add(userId):
     scans = db['scans']
     f = request.files['image']
+    lat = float(request.form.get('lat'))
+    long = float(request.form.get('long'))
     filename = str(uuid4())
-    f_name, f_ext = os.path.splitext(f.filename)
-    f.save(os.path.join('static/images/scans/', filename) + f_ext)
+    f.save(os.path.join('static/images/scans/', filename))
     dt_now = datetime.utcnow()
     scans.insert_one({
         "u_id": userId,
         "filename": filename,
         "scandate": dt_now,
+        "position": {
+            "lat": lat,
+            "long": long
+        },
+        "loc": {
+            "type": "Point",
+            "coordinates": [lat, long]
+        },
+        "upvote": 0,
+        "date": datetime.utcnow(),
     })
     return {"error": "0", "message": "Succesful",}
-    
+
 @app.route('/api/wel',methods=['POST'])
 @token_required
 def api_welcome(userId):
